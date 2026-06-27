@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoRank · Join</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0d0d0d;
+        --surface: #1a1a2e;
+        --border: #2a2a45;
+        --text: #e8e8e8;
+        --muted: #6b6b8a;
+        --violet: #7c3aed;
+        --violet-h: #9155ff;
+        --amber: #f59e0b;
+        --green: #22c55e;
+        --red: #ef4444;
+        --font-d: "Space Grotesk", sans-serif;
+        --font-b: "Inter", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        font-family: var(--font-d);
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .logo span {
+        color: var(--violet);
+      }
+      .nick-badge {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.35rem 0.9rem;
+        font-size: 0.85rem;
+        display: none;
+      }
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 560px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        gap: 1.5rem;
+      }
+
+      /* cards */
+      .card {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .card h2 {
+        font-family: var(--font-d);
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+      .card p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      label span {
+        color: var(--text);
+      }
+      input[type="text"],
+      input[type="file"] {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--text);
+        font-family: var(--font-b);
+        font-size: 0.95rem;
+        padding: 0.65rem 0.9rem;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input[type="text"]:focus {
+        border-color: var(--violet);
+      }
+      input[type="file"] {
+        padding: 0.5rem 0.9rem;
+        cursor: pointer;
+      }
+
+      .btn {
+        font-family: var(--font-d);
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        padding: 0.75rem 1.5rem;
+        transition:
+          opacity 0.15s,
+          transform 0.1s;
+        width: 100%;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: var(--violet);
+        color: #fff;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--violet-h);
+      }
+      .btn-amber {
+        background: var(--amber);
+        color: #000;
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .btn-ghost:hover:not(:disabled) {
+        border-color: var(--violet);
+        color: var(--violet);
+      }
+
+      /* panels */
+      .panel {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      .panel.active {
+        display: flex;
+      }
+
+      /* lobby waiting */
+      .waiting-indicator {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        text-align: center;
+      }
+      .pulse-ring {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 3px solid var(--violet);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 1;
+        }
+      }
+
+      /* upload area */
+      .upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .upload-zone:hover {
+        border-color: var(--violet);
+      }
+      .upload-zone p {
+        color: var(--muted);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+      }
+      .upload-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .upload-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.4rem;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.82rem;
+      }
+      .upload-item .ok {
+        color: var(--green);
+      }
+      .upload-item .err {
+        color: var(--red);
+      }
+
+      /* game: image */
+      .game-image-wrap {
+        width: 100%;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 240px;
+      }
+      .game-image-wrap img {
+        width: 100%;
+        max-height: 55vh;
+        object-fit: contain;
+        display: block;
+      }
+      .pair-wrap {
+        display: flex;
+        gap: 0.75rem;
+        width: 100%;
+      }
+      .pair-wrap .game-image-wrap {
+        flex: 1;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .pair-wrap .game-image-wrap:hover {
+        border-color: var(--violet);
+      }
+      .pair-wrap .game-image-wrap.selected {
+        border-color: var(--amber);
+      }
+      .pair-label {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--muted);
+        padding: 0 0.5rem;
+        text-align: center;
+      }
+
+      /* stars */
+      .star-row {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+      }
+      .star {
+        font-size: 2.5rem;
+        cursor: pointer;
+        transition: transform 0.1s;
+        color: var(--border);
+        line-height: 1;
+        user-select: none;
+      }
+      .star:hover,
+      .star.lit {
+        color: var(--amber);
+      }
+      .star:active {
+        transform: scale(1.2);
+      }
+
+      /* voted state */
+      .voted-banner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        padding: 1rem;
+        background: #0d2a1a;
+        border: 1px solid var(--green);
+        border-radius: 0.6rem;
+        color: var(--green);
+        font-family: var(--font-d);
+        font-weight: 600;
+      }
+
+      /* end */
+      .top3-grid {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .top3-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .top3-item img {
+        width: 120px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        border: 2px solid var(--border);
+      }
+      .top3-rank {
+        font-family: var(--font-d);
+        font-size: 0.8rem;
+        color: var(--amber);
+      }
+
+      /* toast */
+      #toast {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.6rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 999;
+      }
+      #toast.show {
+        opacity: 1;
+      }
+      #toast.error {
+        border-color: var(--red);
+        color: var(--red);
+      }
+      #toast.success {
+        border-color: var(--green);
+        color: var(--green);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">Photo<span>Rank</span></div>
+      <span class="nick-badge" id="nickBadge"></span>
+    </header>
+
+    <main>
+      <!-- JOIN -->
+      <div class="panel active" id="panelJoin">
+        <div class="card">
+          <h2>Join a session</h2>
+          <p>
+            Enter the session code shown on the host screen, then pick a
+            nickname.
+          </p>
+          <label
+            ><span>Session code</span>
+            <input
+              type="text"
+              id="inputCode"
+              placeholder="ABC123"
+              maxlength="6"
+              style="
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+                font-family: var(--font-d);
+                font-size: 1.1rem;
+              "
+            />
+          </label>
+          <label
+            ><span>Nickname</span>
+            <input
+              type="text"
+              id="inputNick"
+              placeholder="Your name"
+              maxlength="32"
+            />
+          </label>
+          <button class="btn btn-primary" onclick="joinSession()">
+            Join →
+          </button>
+        </div>
+      </div>
+
+      <!-- LOBBY -->
+      <div class="panel" id="panelLobby">
+        <div class="waiting-indicator">
+          <div class="pulse-ring"></div>
+          <div>
+            <p
+              style="
+                font-family: var(--font-d);
+                font-weight: 600;
+                font-size: 1.1rem;
+              "
+            >
+              In the lobby
+            </p>
+            <p style="color: var(--muted); margin-top: 0.25rem">
+              Waiting for the host to start…
+            </p>
+          </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="card" id="uploadCard">
+          <h2>Upload your photos</h2>
+          <p>Optional — add your own images to the session while waiting.</p>
+          <label class="upload-zone" for="fileInput">
+            <span style="font-size: 2rem">📷</span>
+            <p>Click to choose images (JPEG, PNG, WebP)</p>
+            <input
+              type="file"
+              id="fileInput"
+              accept="image/*"
+              multiple
+              style="display: none"
+              onchange="uploadFiles(this.files)"
+            />
+          </label>
+          <div class="upload-list" id="uploadList"></div>
+        </div>
+      </div>
+
+      <!-- GAME -->
+      <div class="panel" id="panelGame">
+        <div
+          id="gameContent"
+          style="
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            align-items: center;
+          "
+        ></div>
+      </div>
+
+      <!-- END -->
+      <div class="panel" id="panelEnd">
+        <div class="card" style="text-align: center">
+          <h2>🎉 Session over</h2>
+          <p>Thanks for rating! Here are the top picks.</p>
+          <div class="top3-grid" id="top3Grid"></div>
+        </div>
+      </div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script>
+      let sessionCode = null;
+      let nickname = null;
+      let pollTimer = null;
+      let lastImageKey = null; // track image changes to reset voted state
+      let voted = false;
+      let selectedPair = null;
+
+      async function api(method, path, body) {
+        const opts = {
+          method,
+          headers: { "Content-Type": "application/json" },
+        };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(path, opts);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || res.statusText);
+        return data;
+      }
+
+      function toast(msg, type = "") {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = "show" + (type ? " " + type : "");
+        clearTimeout(el._t);
+        el._t = setTimeout(() => (el.className = ""), 2800);
+      }
+
+      // ── Join ────────────────────────────────────────────────────────────────────
+      async function joinSession() {
+        const code = document
+          .getElementById("inputCode")
+          .value.trim()
+          .toUpperCase();
+        const nick = document.getElementById("inputNick").value.trim();
+        if (!code || !nick) {
+          toast("Enter both a code and nickname", "error");
+          return;
+        }
+        try {
+          const data = await api("POST", `/session/${code}/join`, {
+            nickname: nick,
+          });
+          sessionCode = data.code;
+          nickname = data.nickname;
+          document.getElementById("nickBadge").textContent = nick;
+          document.getElementById("nickBadge").style.display = "";
+          setPanel("lobby");
+          startPolling();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      // ── Upload ──────────────────────────────────────────────────────────────────
+      async function uploadFiles(files) {
+        for (const file of files) {
+          const row = document.createElement("div");
+          row.className = "upload-item";
+          row.textContent = file.name;
+          document.getElementById("uploadList").appendChild(row);
+
+          try {
+            const form = new FormData();
+            form.append("file", file);
+            const res = await fetch(
+              `/session/${sessionCode}/upload?nickname=${encodeURIComponent(nickname)}`,
+              {
+                method: "POST",
+                body: form,
+              },
+            );
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail);
+            row.innerHTML = `${file.name} <span class="ok">✓</span>`;
+          } catch (e) {
+            row.innerHTML = `${file.name} <span class="err">✗ ${e.message}</span>`;
+          }
+        }
+      }
+
+      // ── Polling ─────────────────────────────────────────────────────────────────
+      function startPolling() {
+        clearInterval(pollTimer);
+        pollTimer = setInterval(poll, 1500);
+      }
+
+      async function poll() {
+        if (!sessionCode) return;
+        try {
+          const data = await api("GET", `/session/${sessionCode}/state`);
+          if (data.state === "lobby") {
+            /* just wait */
+          }
+          if (data.state === "game") {
+            setPanel("game");
+            updateGame(data);
+          }
+          if (data.state === "end") {
+            clearInterval(pollTimer);
+            setPanel("end");
+            showEnd(data);
+          }
+        } catch (e) {
+          /* silent */
+        }
+      }
+
+      // ── Game UI ──────────────────────────────────────────────────────────────────
+      function updateGame(data) {
+        const ps = data.plugin_state;
+        if (!ps) return;
+        const content = document.getElementById("gameContent");
+
+        // reset voted state when image changes
+        const imageKey =
+          ps.mode === "head_to_head"
+            ? (ps.pair || []).join("|")
+            : ps.current_image;
+        if (imageKey !== lastImageKey) {
+          lastImageKey = imageKey;
+          voted = false;
+          selectedPair = null;
+        }
+
+        if (ps.mode === "star_rating") {
+          renderStarMode(content, ps);
+        } else if (ps.mode === "head_to_head") {
+          renderHeadToHead(content, ps);
+        }
+      }
+
+      function renderStarMode(container, ps) {
+        const f = ps.current_image ? filename(ps.current_image) : null;
+        container.innerHTML = `
+    <div class="game-image-wrap">
+      ${f ? `<img src="/images/${sessionCode}/${encodeURIComponent(f)}" alt="${f}">` : '<span style="color:var(--muted)">No image</span>'}
+    </div>
+    ${
+      voted
+        ? `<div class="voted-banner">✓ Rated! Waiting for next image…</div>`
+        : `<div class="star-row" id="starRow">
+          ${[1, 2, 3, 4, 5].map((n) => `<span class="star" data-v="${n}" onclick="submitStar(${n})">★</span>`).join("")}
+        </div>
+        <p style="color:var(--muted);font-size:.82rem;text-align:center;">Tap a star to rate this photo</p>`
+    }
+  `;
+      }
+
+      function renderHeadToHead(container, ps) {
+        const [a, b] = ps.pair || [];
+        const fa = a ? filename(a) : null;
+        const fb = b ? filename(b) : null;
+        container.innerHTML = `
+    <p style="color:var(--muted);font-size:.9rem;text-align:center;">Which photo is better?</p>
+    ${
+      voted
+        ? `<div class="voted-banner">✓ Picked! Waiting for next round…</div>`
+        : `<div class="pair-wrap">
+          <div class="game-image-wrap${selectedPair === fa ? " selected" : ""}" onclick="selectPair('${fa}',this)">
+            ${fa ? `<img src="/images/${sessionCode}/${encodeURIComponent(fa)}" alt="${fa}">` : ""}
+            <span class="pair-label">${fa || ""}</span>
+          </div>
+          <div class="game-image-wrap${selectedPair === fb ? " selected" : ""}" onclick="selectPair('${fb}',this)">
+            ${fb ? `<img src="/images/${sessionCode}/${encodeURIComponent(fb)}" alt="${fb}">` : ""}
+            <span class="pair-label">${fb || ""}</span>
+          </div>
+        </div>
+        <button class="btn btn-amber" onclick="submitPick()" ${!selectedPair ? "disabled" : ""} id="confirmPick">Confirm pick →</button>`
+    }
+  `;
+      }
+
+      // ── Voting ──────────────────────────────────────────────────────────────────
+      async function submitStar(rating) {
+        if (voted) return;
+        try {
+          await api("POST", `/session/${sessionCode}/vote`, {
+            nickname,
+            payload: { rating },
+          });
+          voted = true;
+          toast(`Rated ${rating} ★`, "success");
+          // re-render voted banner
+          const data = await api("GET", `/session/${sessionCode}/state`);
+          updateGame(data);
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      function selectPair(fname, el) {
+        if (voted) return;
+        selectedPair = fname;
+        document
+          .querySelectorAll(".pair-wrap .game-image-wrap")
+          .forEach((w) => w.classList.remove("selected"));
+        el.classList.add("selected");
+        const btn = document.getElementById("confirmPick");
+        if (btn) btn.disabled = false;
+      }
+
+      async function submitPick() {
+        if (voted || !selectedPair) return;
+        try {
+          await api("POST", `/session/${sessionCode}/vote`, {
+            nickname,
+            payload: { winner: selectedPair },
+          });
+          voted = true;
+          toast("Pick confirmed!", "success");
+          const data = await api("GET", `/session/${sessionCode}/state`);
+          updateGame(data);
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      // ── End ─────────────────────────────────────────────────────────────────────
+      function showEnd(data) {
+        const ps = data.plugin_state;
+        const scores = ps?.scores || ps?.win_rates || {};
+        const top3 = Object.entries(scores)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+        const ranks = ["🥇", "🥈", "🥉"];
+        document.getElementById("top3Grid").innerHTML = top3
+          .map(
+            ([f, v], i) =>
+              `<div class="top3-item">
+      <span class="top3-rank">${ranks[i]}</span>
+      <img src="/images/${sessionCode}/${encodeURIComponent(filename(f))}" alt="${filename(f)}">
+      <span style="font-size:.75rem;color:var(--muted)">${v}</span>
+    </div>`,
+          )
+          .join("");
+      }
+
+      // ── Helpers ──────────────────────────────────────────────────────────────────
+      function filename(path) {
+        return path ? path.split("/").pop().split("\\").pop() : "";
+      }
+
+      function setPanel(name) {
+        ["Join", "Lobby", "Game", "End"].forEach((p) => {
+          document
+            .getElementById("panel" + p)
+            .classList.toggle("active", p.toLowerCase() === name);
+        });
+      }
+    </script>
+  </body>
+</html>
