@@ -8,7 +8,7 @@ class StarRatingState:
     images: list[str]
     index: int = 0
     # image filename -> list of ratings (1-5) per player
-    votes: dict[str, list[int]] = field(default_factory=dict)
+    votes: dict[str, list[int]] = field(default_factory=dict[str, list[int]])
 
 
 class StarRatingPlugin(GamePlugin):
@@ -30,9 +30,9 @@ class StarRatingPlugin(GamePlugin):
             self._state.votes[img] = []
         return self._snapshot()
 
-    def vote(self, player: str, payload: dict) -> None:
+    def vote(self, player: str, payload: dict[str, object]) -> None:
         assert self._state is not None, "Plugin not started"
-        rating = int(payload["rating"])
+        rating = int(str(payload["rating"]))
         if not 1 <= rating <= 5:
             raise ValueError(f"Rating must be 1–5, got {rating}")
         current = self._state.images[self._state.index]
@@ -50,7 +50,7 @@ class StarRatingPlugin(GamePlugin):
 
     def get_winners(self, threshold: float) -> list[str]:
         assert self._state is not None, "Plugin not started"
-        winners = []
+        winners: list[str] = []
         for img, ratings in self._state.votes.items():
             if not ratings:
                 continue
@@ -68,11 +68,13 @@ class StarRatingPlugin(GamePlugin):
     # ------------------------------------------------------------------
 
     def _average(self, img: str) -> float:
+        assert self._state
         ratings = self._state.votes.get(img, [])
         return round(sum(ratings) / len(ratings), 2) if ratings else 0.0
 
     def _snapshot(self) -> PluginState:
         s = self._state
+        assert s
         current = s.images[s.index] if s.images else None
         ratings = s.votes.get(current, []) if current else []
         return PluginState(

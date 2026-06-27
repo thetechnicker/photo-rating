@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .plugins import PLUGIN_REGISTRY
-from .plugins.base import GamePlugin
+from .plugins.base import GamePlugin, PluginState
 
 # ---------------------------------------------------------------------------
 # Config
@@ -57,8 +57,8 @@ class Session:
     max_session_mb: float
     host_image_dir: Path | None  # pre-existing images from host laptop
     upload_dir: Path  # images uploaded during lobby
-    players: dict[str, Player] = field(default_factory=dict)
-    images: list[str] = field(default_factory=list)  # absolute paths
+    players: dict[str, Player] = field(default_factory=dict[str, Player])
+    images: list[str] = field(default_factory=list[str])  # absolute paths
     plugin: GamePlugin | None = None
 
     @property
@@ -105,7 +105,7 @@ class JoinRequest(BaseModel):
 
 class VoteRequest(BaseModel):
     nickname: str
-    payload: dict  # interpreted by the active plugin
+    payload: dict[str, object]  # interpreted by the active plugin
 
 
 # --- Responses ---
@@ -127,7 +127,7 @@ class SessionStateResponse(BaseModel):
     code: str
     state: SessionState
     players: list[str]
-    plugin_state: dict | None = None
+    plugin_state: dict[str, object] | None = None
 
 
 class FinishResponse(BaseModel):
@@ -273,8 +273,9 @@ def start_game(code: str):
         )
 
     plugin_cls = PLUGIN_REGISTRY[session.mode]
-    session.plugin = plugin_cls()
-    plugin_state = session.plugin.start(images)
+    plugin = plugin_cls()
+    session.plugin = plugin
+    plugin_state = plugin.start(images)
     session.images = images
     session.state = SessionState.GAME
 
@@ -286,6 +287,7 @@ def next_image(code: str):
     """Host advances to the next image/pair."""
     session = _get_session(code)
     _require_state(session, SessionState.GAME)
+    assert session.plugin is not None, "Plugin not started"
 
     plugin_state = session.plugin.next_image()
     return _build_state_response(session, plugin_state)
@@ -296,6 +298,7 @@ def vote(code: str, body: VoteRequest):
     """Participant submits a vote for the current image/pair."""
     session = _get_session(code)
     _require_state(session, SessionState.GAME)
+    assert session.plugin is not None, "Plugin not started"
 
     if body.nickname not in session.players:
         raise HTTPException(status_code=403, detail="Not a participant of this session")
@@ -313,6 +316,7 @@ def finish_session(code: str):
     """Host ends the game. GAME → END. Winners are copied to output folder."""
     session = _get_session(code)
     _require_state(session, SessionState.GAME)
+    assert session.plugin is not None, "Plugin not started"
 
     winners = session.plugin.get_winners(session.threshold)
     output_dir = session.upload_dir / "output"
@@ -367,8 +371,8 @@ def serve_image(code: str, filename: str):
 # ---------------------------------------------------------------------------
 
 
-def _build_state_response(session: Session, plugin_state=None) -> SessionStateResponse:
-    ps_dict = None
+def _build_state_response(session: Session, plugin_state: PluginState | None = None) -> SessionStateResponse:
+    ps_dict: dict[str, object] | None = None
     if plugin_state:
         ps_dict = {
             "current_image": plugin_state.current_image,

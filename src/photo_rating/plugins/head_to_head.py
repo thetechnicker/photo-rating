@@ -11,9 +11,9 @@ class HeadToHeadState:
     pairs: list[tuple[str, str]]
     index: int = 0
     # image filename -> win count
-    wins: dict[str, int] = field(default_factory=dict)
+    wins: dict[str, int] = field(default_factory=dict[str, int])
     # image filename -> number of times it appeared in a pair
-    appearances: dict[str, int] = field(default_factory=dict)
+    appearances: dict[str, int] = field(default_factory=dict[str, int])
 
 
 class HeadToHeadPlugin(GamePlugin):
@@ -44,9 +44,9 @@ class HeadToHeadPlugin(GamePlugin):
         )
         return self._snapshot()
 
-    def vote(self, player: str, payload: dict) -> None:
+    def vote(self, player: str, payload: dict[str, object]) -> None:
         assert self._state is not None, "Plugin not started"
-        winner = payload["winner"]  # filename of chosen image
+        winner = str(payload["winner"])  # filename of chosen image
         if winner not in self._state.wins:
             raise ValueError(f"Unknown image: {winner}")
         self._state.wins[winner] += 1
@@ -63,8 +63,9 @@ class HeadToHeadPlugin(GamePlugin):
 
     def get_winners(self, threshold: float) -> list[str]:
         assert self._state is not None, "Plugin not started"
-        winners = []
-        for img in self._state.images:
+        s = self._state
+        winners: list[str] = []
+        for img in s.images:
             rate = self._win_rate(img)
             if rate >= threshold:
                 winners.append(img)
@@ -80,11 +81,13 @@ class HeadToHeadPlugin(GamePlugin):
 
     def _win_rate(self, img: str) -> float:
         s = self._state
+        assert s is not None, "Plugin not started"
         app = s.appearances.get(img, 0)
         return round(s.wins[img] / app, 2) if app else 0.0
 
     def _snapshot(self) -> PluginState:
         s = self._state
+        assert s
         if not s.pairs:
             return PluginState(current_image=None, image_index=0, total_images=0)
         pair = s.pairs[s.index]

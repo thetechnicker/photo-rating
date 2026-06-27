@@ -9,7 +9,7 @@ class PluginState:
     current_image: str | None
     image_index: int
     total_images: int
-    extra: dict = field(default_factory=dict)  # mode-specific payload
+    extra: dict[str, object] = field(default_factory=dict[str, object])  # mode-specific payload
 
 
 class GamePlugin(ABC):
@@ -25,7 +25,7 @@ class GamePlugin(ABC):
         """Initialise plugin with the full image list. Returns initial state."""
 
     @abstractmethod
-    def vote(self, player: str, payload: dict) -> None:
+    def vote(self, player: str, payload: dict[str, object]) -> None:
         """Record a vote from a player. Payload shape is mode-specific."""
 
     @abstractmethod
