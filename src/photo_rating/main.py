@@ -371,10 +371,10 @@ def host_logout(pr_host_token: str | None = Cookie(default=None)):
 # ── Protected host pages ────────────────────────────────────────────────────
 
 
-def _auth_guard(token: str | None) -> None:
-    """Raise 401 if not authenticated (API calls). Page routes redirect instead."""
-    if not _is_authenticated(token):
-        raise HTTPException(status_code=401, detail="Not authenticated")
+# def _auth_guard(token: str | None) -> None:
+#    """Raise 401 if not authenticated (API calls). Page routes redirect instead."""
+#    if not _is_authenticated(token):
+#        raise HTTPException(status_code=401, detail="Not authenticated")
 
 
 @app.get("/config")
