@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoRank · Live</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #080810;
+        --surface: #0f0f1e;
+        --border: #1e1e35;
+        --text: #e8e8f0;
+        --muted: #5a5a7a;
+        --violet: #7c3aed;
+        --violet-h: #9155ff;
+        --violet-glow: rgba(124, 58, 237, 0.3);
+        --amber: #f59e0b;
+        --amber-glow: rgba(245, 158, 11, 0.25);
+        --green: #22c55e;
+        --red: #ef4444;
+        --font-d: "Space Grotesk", sans-serif;
+        --font-b: "Inter", sans-serif;
+      }
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        overflow: hidden;
+      }
+
+      /* ── Connect overlay ─────────────────────────────────────────────────────── */
+      #connectOverlay {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .connect-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .connect-card h1 {
+        font-family: var(--font-d);
+        font-size: 1.75rem;
+        font-weight: 700;
+      }
+      .connect-card h1 span {
+        color: var(--violet);
+      }
+      .connect-card p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+      .connect-card input {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--text);
+        font-family: var(--font-d);
+        font-size: 1.4rem;
+        font-weight: 600;
+        padding: 0.7rem 1rem;
+        width: 100%;
+        outline: none;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-align: center;
+        transition: border-color 0.2s;
+      }
+      .connect-card input:focus {
+        border-color: var(--violet);
+      }
+      .btn {
+        font-family: var(--font-d);
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        padding: 0.75rem 1.5rem;
+        transition: opacity 0.15s;
+        width: 100%;
+      }
+      .btn-primary {
+        background: var(--violet);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--violet-h);
+      }
+
+      /* ── Main layout: image | sidebar ─────────────────────────────────────────── */
+      #app {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        flex-direction: row;
+      }
+      #app.visible {
+        display: flex;
+      }
+
+      /* Image area */
+      .image-area {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        gap: 1.5rem;
+        position: relative;
+      }
+
+      .image-wrap {
+        position: relative;
+        max-width: 100%;
+        max-height: calc(100vh - 160px);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 0 60px var(--violet-glow);
+        transition: opacity 0.4s ease;
+      }
+      .image-wrap img {
+        display: block;
+        max-width: 100%;
+        max-height: calc(100vh - 180px);
+        object-fit: contain;
+      }
+      .image-wrap.fading {
+        opacity: 0;
+      }
+
+      /* Head-to-head pair */
+      .pair-layout {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+      }
+      .pair-layout .image-wrap {
+        flex: 1;
+      }
+      .vs-badge {
+        font-family: var(--font-d);
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+
+      /* Progress bar */
+      .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        max-width: 600px;
+      }
+      .progress-track {
+        flex: 1;
+        height: 3px;
+        background: var(--border);
+        border-radius: 999px;
+      }
+      .progress-fill {
+        height: 3px;
+        border-radius: 999px;
+        background: var(--violet);
+        transition: width 0.5s ease;
+      }
+      .progress-label {
+        color: var(--muted);
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+
+      /* Waiting / lobby state */
+      .waiting-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        text-align: center;
+      }
+      .big-code {
+        font-family: var(--font-d);
+        font-size: 5rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        color: var(--amber);
+        line-height: 1;
+      }
+      .big-code-label {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .player-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        max-width: 500px;
+      }
+      .player-chip {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.82rem;
+      }
+
+      /* ── Sidebar ─────────────────────────────────────────────────────────────── */
+      .sidebar {
+        width: 300px;
+        flex-shrink: 0;
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .sidebar-top {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .sidebar-logo {
+        font-family: var(--font-d);
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .sidebar-logo span {
+        color: var(--violet);
+      }
+      .code-badge {
+        font-family: var(--font-d);
+        font-size: 0.8rem;
+        color: var(--amber);
+        letter-spacing: 0.1em;
+        margin-top: 0.2rem;
+      }
+
+      /* Countdown */
+      .countdown-section {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .countdown-ring {
+        position: relative;
+        width: 56px;
+        height: 56px;
+        flex-shrink: 0;
+      }
+      .countdown-ring svg {
+        transform: rotate(-90deg);
+      }
+      .countdown-ring circle {
+        fill: none;
+        stroke-width: 4;
+      }
+      .countdown-ring .track {
+        stroke: var(--border);
+      }
+      .countdown-ring .fill {
+        stroke: var(--amber);
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.9s linear;
+      }
+      .countdown-number {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-d);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--amber);
+      }
+      .countdown-label {
+        font-size: 0.82rem;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .countdown-label strong {
+        display: block;
+        color: var(--text);
+        font-size: 0.9rem;
+      }
+      .countdown-section.hidden {
+        display: none;
+      }
+
+      /* Leaderboard */
+      .lb-title {
+        padding: 1rem 1.25rem 0.5rem;
+        font-family: var(--font-d);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+      }
+      .leaderboard {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 1.25rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .lb-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .lb-rank {
+        font-family: var(--font-d);
+        font-size: 0.75rem;
+        color: var(--muted);
+        width: 1.2rem;
+        text-align: right;
+        flex-shrink: 0;
+      }
+      .lb-thumb {
+        width: 36px;
+        height: 28px;
+        border-radius: 4px;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+      }
+      .lb-name {
+        flex: 1;
+        font-size: 0.78rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text);
+      }
+      .lb-bar-wrap {
+        width: 48px;
+        height: 3px;
+        background: var(--border);
+        border-radius: 999px;
+      }
+      .lb-bar {
+        height: 3px;
+        border-radius: 999px;
+        background: var(--amber);
+        transition: width 0.4s;
+      }
+      .lb-val {
+        font-family: var(--font-d);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--amber);
+        min-width: 2.2rem;
+        text-align: right;
+      }
+
+      /* ── Winner podium ─────────────────────────────────────────────────────────── */
+      #podiumState {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2.5rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      #podiumState.visible {
+        display: flex;
+      }
+      .podium-title {
+        font-family: var(--font-d);
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .podium-title span {
+        color: var(--amber);
+      }
+      .podium-row {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-end;
+        justify-content: center;
+      }
+      .podium-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .podium-rank-label {
+        font-family: var(--font-d);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+      }
+      .podium-item:nth-child(1) .podium-img {
+        width: 240px;
+        height: 180px;
+        border-color: var(--amber);
+        box-shadow: 0 0 40px var(--amber-glow);
+      }
+      .podium-item:nth-child(2) .podium-img,
+      .podium-item:nth-child(3) .podium-img {
+        width: 180px;
+        height: 135px;
+      }
+      .podium-img {
+        object-fit: cover;
+        border-radius: 0.75rem;
+        border: 2px solid var(--border);
+        display: block;
+      }
+      .podium-score {
+        font-family: var(--font-d);
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--amber);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Connect overlay (shown until code entered or code in URL) -->
+    <div id="connectOverlay">
+      <div class="connect-card">
+        <h1>Photo<span>Rank</span></h1>
+        <p>Enter the session code to display the live presentation.</p>
+        <input
+          type="text"
+          id="codeInput"
+          placeholder="ABC123"
+          maxlength="6"
+          autofocus
+        />
+        <button class="btn btn-primary" onclick="connect()">Connect →</button>
+      </div>
+    </div>
+
+    <!-- Main app -->
+    <div id="app">
+      <!-- Image area -->
+      <div class="image-area" id="imageArea">
+        <!-- Content injected by JS -->
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-logo">Photo<span>Rank</span></div>
+          <div class="code-badge" id="sidebarCode"></div>
+        </div>
+
+        <!-- Countdown ring -->
+        <div class="countdown-section hidden" id="countdownSection">
+          <div class="countdown-ring">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <circle class="track" cx="28" cy="28" r="24" />
+              <circle
+                class="fill"
+                id="countdownArc"
+                cx="28"
+                cy="28"
+                r="24"
+                stroke-dasharray="150.8"
+                stroke-dashoffset="0"
+              />
+            </svg>
+            <div class="countdown-number" id="countdownNum">—</div>
+          </div>
+          <div class="countdown-label">
+            <strong>Next image in</strong>
+            Voting is open
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="lb-title">Leaderboard</div>
+        <div class="leaderboard" id="leaderboard">
+          <div
+            style="color: var(--muted); font-size: 0.82rem; padding: 0.5rem 0"
+          >
+            Waiting for game to start…
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Podium (end state) -->
+    <div id="podiumState">
+      <div class="podium-title">🎉 <span>Top Photos</span></div>
+      <div class="podium-row" id="podiumRow"></div>
+      <p style="color: var(--muted); font-size: 0.9rem">Session complete</p>
+    </div>
+
+    <script>
+      let sessionCode = null;
+      let pollTimer = null;
+      let autoAdvanceDuration = null;
+
+      // ── Check for code in URL path ─────────────────────────────────────────────
+      (function () {
+        const parts = location.pathname.split("/");
+        const last = parts[parts.length - 1];
+        if (last && last.length === 6 && /^[A-Z0-9]+$/i.test(last)) {
+          document.getElementById("codeInput").value = last.toUpperCase();
+          connect();
+        }
+      })();
+
+      // ── Connect ─────────────────────────────────────────────────────────────────
+      function connect() {
+        const code = document
+          .getElementById("codeInput")
+          .value.trim()
+          .toUpperCase();
+        if (!code) return;
+        sessionCode = code;
+        document.getElementById("sidebarCode").textContent = code;
+        document.getElementById("connectOverlay").style.display = "none";
+        document.getElementById("app").classList.add("visible");
+        startPolling();
+      }
+
+      // ── API ─────────────────────────────────────────────────────────────────────
+      async function api(path) {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      }
+
+      // ── Polling ─────────────────────────────────────────────────────────────────
+      function startPolling() {
+        clearInterval(pollTimer);
+        pollTimer = setInterval(poll, 1500);
+        poll();
+      }
+
+      async function poll() {
+        try {
+          const data = await api(`/session/${sessionCode}/state`);
+          if (data.state === "lobby") renderLobby(data);
+          else if (data.state === "game") renderGame(data);
+          else if (data.state === "end") renderEnd(data);
+        } catch (e) {
+          /* silent */
+        }
+      }
+
+      // ── Lobby ──────────────────────────────────────────────────────────────────
+      function renderLobby(data) {
+        document.getElementById("countdownSection").classList.add("hidden");
+        const area = document.getElementById("imageArea");
+        const chips = data.players
+          .map((p) => `<div class="player-chip">${p}</div>`)
+          .join("");
+        area.innerHTML = `
+          <div class="waiting-state">
+            <div class="big-code-label">Join at this session code</div>
+            <div class="big-code">${sessionCode}</div>
+            <div class="player-chips">${chips || '<span style="color:var(--muted)">Waiting for players…</span>'}</div>
+          </div>`;
+      }
+
+      // ── Game ───────────────────────────────────────────────────────────────────
+      let lastImageKey = null;
+
+      function renderGame(data) {
+        const ps = data.plugin_state;
+        if (!ps) return;
+
+        // Countdown
+        const timerTotal = data.auto_advance_game_s;
+        const timerLeft = data.time_remaining_s;
+        if (timerTotal != null && timerLeft != null) {
+          autoAdvanceDuration = timerTotal;
+          updateCountdown(timerLeft, timerTotal);
+          document
+            .getElementById("countdownSection")
+            .classList.remove("hidden");
+        } else {
+          document.getElementById("countdownSection").classList.add("hidden");
+        }
+
+        // Image
+        const imageKey =
+          ps.mode === "head_to_head"
+            ? (ps.pair || []).join("|")
+            : ps.current_image;
+        const area = document.getElementById("imageArea");
+
+        if (imageKey !== lastImageKey) {
+          lastImageKey = imageKey;
+          // Fade transition
+          const wrap = area.querySelector(".image-wrap");
+          if (wrap) wrap.classList.add("fading");
+          setTimeout(() => buildGameContent(area, ps, data), 380);
+        }
+
+        // Progress
+        if (ps.total_images > 0) {
+          const pct = Math.round(
+            ((ps.image_index + 1) / ps.total_images) * 100,
+          );
+          const fill = area.querySelector(".progress-fill");
+          const label = area.querySelector(".progress-label");
+          if (fill) fill.style.width = pct + "%";
+          if (label)
+            label.textContent = `${ps.image_index + 1} / ${ps.total_images}`;
+        }
+
+        // Leaderboard
+        const scores = ps.scores || ps.win_rates || {};
+        buildLeaderboard(scores);
+      }
+
+      function buildGameContent(area, ps, data) {
+        let imageHtml = "";
+        if (ps.mode === "head_to_head" && ps.pair) {
+          const [a, b] = ps.pair;
+          imageHtml = `
+            <div class="pair-layout">
+              <div class="image-wrap"><img src="/images/${sessionCode}/${encodeURIComponent(fname(a))}" alt="${fname(a)}"></div>
+              <div class="vs-badge">VS</div>
+              <div class="image-wrap"><img src="/images/${sessionCode}/${encodeURIComponent(fname(b))}" alt="${fname(b)}"></div>
+            </div>`;
+        } else if (ps.current_image) {
+          imageHtml = `<div class="image-wrap"><img src="/images/${sessionCode}/${encodeURIComponent(fname(ps.current_image))}" alt="${fname(ps.current_image)}"></div>`;
+        }
+        area.innerHTML = `
+          ${imageHtml}
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" style="width:0%"></div></div>
+            <span class="progress-label">— / —</span>
+          </div>`;
+      }
+
+      // ── Countdown ring ─────────────────────────────────────────────────────────
+      // Full circumference for r=24: 2π*24 ≈ 150.8
+      const CIRC = 150.8;
+
+      function updateCountdown(remaining, total) {
+        const num = document.getElementById("countdownNum");
+        const arc = document.getElementById("countdownArc");
+        num.textContent = Math.ceil(remaining);
+        const frac = total > 0 ? remaining / total : 0;
+        arc.style.strokeDashoffset = CIRC * (1 - frac);
+
+        // Colour shifts to red in last 20%
+        arc.style.stroke = frac < 0.2 ? "var(--red)" : "var(--amber)";
+        num.style.color = frac < 0.2 ? "var(--red)" : "var(--amber)";
+      }
+
+      // ── Leaderboard ────────────────────────────────────────────────────────────
+      function buildLeaderboard(scores) {
+        const entries = Object.entries(scores)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 12);
+        const max = entries[0]?.[1] || 1;
+        document.getElementById("leaderboard").innerHTML =
+          entries
+            .map(
+              ([f, v], i) => `
+          <div class="lb-row">
+            <span class="lb-rank">${i + 1}</span>
+            <img class="lb-thumb" src="/images/${sessionCode}/${encodeURIComponent(fname(f))}" alt="${fname(f)}">
+            <span class="lb-name">${fname(f)}</span>
+            <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round((v / max) * 100)}%"></div></div>
+            <span class="lb-val">${v}</span>
+          </div>`,
+            )
+            .join("") ||
+          `<div style="color:var(--muted);font-size:0.82rem">No votes yet</div>`;
+      }
+
+      // ── End / Podium ───────────────────────────────────────────────────────────
+      function renderEnd(data) {
+        clearInterval(pollTimer);
+        document.getElementById("app").classList.remove("visible");
+        const podium = document.getElementById("podiumState");
+        podium.classList.add("visible");
+
+        const ps = data.plugin_state;
+        const scores = ps?.scores || ps?.win_rates || {};
+        const top3 = Object.entries(scores)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+        const ranks = ["🥇 1st", "🥈 2nd", "🥉 3rd"];
+
+        document.getElementById("podiumRow").innerHTML = top3
+          .map(
+            ([f, v], i) => `
+          <div class="podium-item">
+            <span class="podium-rank-label">${ranks[i]}</span>
+            <img class="podium-img" src="/images/${sessionCode}/${encodeURIComponent(fname(f))}" alt="${fname(f)}">
+            <span class="podium-score">${v}</span>
+          </div>`,
+          )
+          .join("");
+      }
+
+      // ── Helpers ────────────────────────────────────────────────────────────────
+      function fname(path) {
+        return path ? path.split("/").pop().split("\\").pop() : "";
+      }
+    </script>
+  </body>
+</html>

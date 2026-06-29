@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoRank · Host Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0d0d0d;
+        --surface: #1a1a2e;
+        --border: #2a2a45;
+        --text: #e8e8e8;
+        --muted: #6b6b8a;
+        --violet: #7c3aed;
+        --violet-h: #9155ff;
+        --red: #ef4444;
+        --font-d: "Space Grotesk", sans-serif;
+        --font-b: "Inter", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .logo {
+        font-family: var(--font-d);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .logo span {
+        color: var(--violet);
+      }
+      .logo small {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-family: var(--font-b);
+        font-weight: 400;
+        margin-top: 0.2rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .field label {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      input[type="password"] {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--text);
+        font-family: var(--font-b);
+        font-size: 0.95rem;
+        padding: 0.65rem 0.9rem;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input[type="password"]:focus {
+        border-color: var(--violet);
+      }
+      input.error {
+        border-color: var(--red);
+      }
+
+      .error-msg {
+        font-size: 0.82rem;
+        color: var(--red);
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.85rem;
+        display: none;
+      }
+      .error-msg.visible {
+        display: block;
+      }
+
+      .btn {
+        font-family: var(--font-d);
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        padding: 0.75rem 1.5rem;
+        width: 100%;
+        background: var(--violet);
+        color: #fff;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .btn:hover {
+        background: var(--violet-h);
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+
+      .join-link {
+        text-align: center;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .join-link a {
+        color: var(--violet-h);
+        text-decoration: none;
+      }
+      .join-link a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">
+        Photo<span>Rank</span>
+        <small>Host access</small>
+      </div>
+
+      <div class="error-msg" id="errorMsg">Incorrect password — try again.</div>
+
+      <form method="POST" action="/host-login">
+        <!-- Preserve ?next= redirect target if present -->
+        <input type="hidden" name="next" id="nextInput" value="/config" />
+
+        <div class="field" style="margin-bottom: 1rem">
+          <label for="password">Host password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            autofocus
+          />
+        </div>
+
+        <button type="submit" class="btn">Sign in →</button>
+      </form>
+
+      <div class="join-link">
+        Not a host? <a href="/join">Go to the voting page</a>
+      </div>
+    </div>
+
+    <script>
+      // Read ?error and ?next from query string
+      const params = new URLSearchParams(location.search);
+      if (params.get("error")) {
+        document.getElementById("errorMsg").classList.add("visible");
+        document.getElementById("password").classList.add("error");
+      }
+      const next = params.get("next");
+      if (next) {
+        document.getElementById("nextInput").value = next;
+      }
+    </script>
+  </body>
+</html>

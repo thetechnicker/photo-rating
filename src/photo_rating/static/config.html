@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoRank · Config</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0d0d0d;
+        --surface: #1a1a2e;
+        --surface2: #12122a;
+        --border: #2a2a45;
+        --text: #e8e8e8;
+        --muted: #6b6b8a;
+        --violet: #7c3aed;
+        --violet-h: #9155ff;
+        --amber: #f59e0b;
+        --green: #22c55e;
+        --red: #ef4444;
+        --font-d: "Space Grotesk", sans-serif;
+        --font-b: "Inter", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        font-family: var(--font-d);
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .logo span {
+        color: var(--violet);
+      }
+      .logo small {
+        font-size: 0.7rem;
+        color: var(--muted);
+        font-family: var(--font-b);
+        font-weight: 400;
+        margin-left: 0.4rem;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .session-badge {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-d);
+        font-weight: 600;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        font-size: 0.9rem;
+      }
+      .session-badge .code {
+        color: var(--amber);
+        letter-spacing: 0.1em;
+      }
+      .state-pill {
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+      }
+      .state-idle {
+        background: #333;
+        color: var(--muted);
+      }
+      .state-lobby {
+        background: #1a3a2e;
+        color: var(--green);
+      }
+      .state-game {
+        background: #2a1a4e;
+        color: var(--violet-h);
+      }
+      .state-end {
+        background: #3a2a00;
+        color: var(--amber);
+      }
+
+      /* Layout */
+      main {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        overflow: hidden;
+      }
+
+      /* Left panel — always visible */
+      .left-panel {
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .section {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .section-title {
+        font-family: var(--font-d);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+
+      /* Form elements */
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+      }
+      .field:last-child {
+        margin-bottom: 0;
+      }
+      .field label {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .field label span {
+        color: var(--text);
+      }
+      .field small {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 0.1rem;
+      }
+      input[type="text"],
+      input[type="number"],
+      select,
+      input[type="range"] {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--text);
+        font-family: var(--font-b);
+        font-size: 0.9rem;
+        padding: 0.6rem 0.85rem;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--violet);
+      }
+      select option {
+        background: var(--surface);
+      }
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+
+      /* Timer toggle */
+      .timer-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .timer-row input[type="number"] {
+        flex: 1;
+      }
+      .toggle-label {
+        font-size: 0.8rem;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .switch {
+        position: relative;
+        width: 38px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        inset: 0;
+        background: var(--border);
+        border-radius: 999px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .slider::before {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        bottom: 3px;
+        background: var(--muted);
+        border-radius: 50%;
+        transition: 0.2s;
+      }
+      input:checked + .slider {
+        background: var(--violet);
+      }
+      input:checked + .slider::before {
+        transform: translateX(16px);
+        background: #fff;
+      }
+
+      /* Buttons */
+      .btn {
+        font-family: var(--font-d);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        padding: 0.7rem 1.4rem;
+        transition:
+          opacity 0.15s,
+          transform 0.1s;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: var(--violet);
+        color: #fff;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--violet-h);
+      }
+      .btn-amber {
+        background: var(--amber);
+        color: #000;
+      }
+      .btn-amber:hover:not(:disabled) {
+        opacity: 0.85;
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .btn-ghost:hover:not(:disabled) {
+        border-color: var(--violet);
+        color: var(--violet);
+      }
+      .btn-danger {
+        background: transparent;
+        border: 1px solid var(--red);
+        color: var(--red);
+      }
+      .btn-full {
+        width: 100%;
+      }
+
+      /* Right panel — photo management */
+      .right-panel {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .right-panel .section-title {
+        margin-bottom: 0.75rem;
+      }
+      .photo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+        padding: 1.5rem;
+      }
+      .photo-card {
+        position: relative;
+        border-radius: 0.6rem;
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        aspect-ratio: 4/3;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .photo-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: opacity 0.2s;
+      }
+      .photo-card.skipped img {
+        opacity: 0.25;
+      }
+      .photo-card.skipped {
+        border-color: var(--red);
+      }
+      .skip-badge {
+        position: absolute;
+        top: 0.4rem;
+        right: 0.4rem;
+        background: var(--red);
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        display: none;
+      }
+      .photo-card.skipped .skip-badge {
+        display: block;
+      }
+      .photo-name {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+        padding: 0.4rem 0.5rem 0.35rem;
+        font-size: 0.7rem;
+        color: #fff;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .photo-grid-empty {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      /* Action bar */
+      .action-bar {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+      .action-links {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.82rem;
+      }
+      .action-links a {
+        color: var(--violet-h);
+        text-decoration: none;
+      }
+      .action-links a:hover {
+        text-decoration: underline;
+      }
+
+      /* Session status summary */
+      .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .stat-cell {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.75rem;
+      }
+      .stat-cell .label {
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .stat-cell .value {
+        font-family: var(--font-d);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 0.1rem;
+      }
+
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.6rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        color: var(--text);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 999;
+      }
+      #toast.show {
+        opacity: 1;
+      }
+      #toast.error {
+        border-color: var(--red);
+        color: var(--red);
+      }
+      #toast.success {
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      .right-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        flex-direction: column;
+        gap: 0.75rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+        padding: 3rem;
+        text-align: center;
+      }
+      .right-placeholder .icon {
+        font-size: 2.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">Photo<span>Rank</span><small>config</small></div>
+      <div class="header-right">
+        <div class="session-badge" id="sessionBadge">
+          Code: <span class="code" id="headerCode">—</span>
+        </div>
+        <span class="state-pill state-idle" id="statePill">idle</span>
+        <a
+          href="/host-logout"
+          style="
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-decoration: none;
+            margin-left: 0.25rem;
+          "
+          title="Sign out"
+          >⎋ logout</a
+        >
+      </div>
+    </header>
+
+    <main>
+      <!-- LEFT: Settings panel -->
+      <div class="left-panel">
+        <!-- Session creation -->
+        <div class="section" id="sectionCreate">
+          <div class="section-title">New session</div>
+
+          <div class="field">
+            <label><span>Game mode</span></label>
+            <select id="mode">
+              <option value="star_rating">⭐ Star Rating (1–5)</option>
+              <option value="head_to_head">⚔️ Head-to-Head</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label id="thresholdLabel"
+              ><span>Winner threshold</span>
+              <small>(avg stars ≥ this)</small></label
+            >
+            <input
+              type="number"
+              id="threshold"
+              value="3.5"
+              min="1"
+              max="5"
+              step="0.1"
+            />
+          </div>
+
+          <div class="field">
+            <label
+              ><span>Host image folder</span>
+              <small>(absolute path on this machine)</small></label
+            >
+            <input
+              type="text"
+              id="hostDir"
+              placeholder="/Users/you/Photos/shoot-2024"
+            />
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label><span>Per-user limit (MB)</span></label>
+              <input type="number" id="perUserMb" value="50" min="1" />
+            </div>
+            <div class="field">
+              <label><span>Session ceiling (MB)</span></label>
+              <input type="number" id="sessionMb" value="500" min="1" />
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full" onclick="createSession()">
+            Create session →
+          </button>
+        </div>
+
+        <!-- Timer settings -->
+        <div class="section">
+          <div class="section-title">Auto-advance timers</div>
+
+          <div class="field">
+            <label><span>Lobby auto-start</span></label>
+            <div class="timer-row">
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="lobbyTimerOn"
+                  onchange="toggleLobbyTimer(this.checked)"
+                />
+                <span class="slider"></span>
+              </label>
+              <input
+                type="number"
+                id="lobbyTimerS"
+                value="60"
+                min="5"
+                max="600"
+                step="5"
+                disabled
+              />
+              <span class="toggle-label">seconds</span>
+            </div>
+            <small
+              >Automatically start the game after this many seconds in
+              lobby</small
+            >
+          </div>
+
+          <div class="field" style="margin-top: 1rem">
+            <label><span>Per-image advance</span></label>
+            <div class="timer-row">
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="gameTimerOn"
+                  onchange="toggleGameTimer(this.checked)"
+                />
+                <span class="slider"></span>
+              </label>
+              <input
+                type="number"
+                id="gameTimerS"
+                value="15"
+                min="3"
+                max="300"
+                step="1"
+                disabled
+              />
+              <span class="toggle-label">seconds</span>
+            </div>
+            <small>Server advances to the next image automatically</small>
+          </div>
+
+          <button
+            class="btn btn-ghost btn-full"
+            id="applyTimersBtn"
+            onclick="applyTimers()"
+            disabled
+            style="margin-top: 0.75rem"
+          >
+            Apply timers
+          </button>
+        </div>
+
+        <!-- Session status -->
+        <div class="section" id="sectionStatus" style="display: none">
+          <div class="section-title">Session status</div>
+          <div class="status-grid">
+            <div class="stat-cell">
+              <div class="label">Players</div>
+              <div class="value" id="statPlayers">0</div>
+            </div>
+            <div class="stat-cell">
+              <div class="label">Images</div>
+              <div class="value" id="statImages">0</div>
+            </div>
+            <div class="stat-cell">
+              <div class="label">Shown</div>
+              <div class="value" id="statShown">—</div>
+            </div>
+            <div class="stat-cell">
+              <div class="label">Skipped</div>
+              <div class="value" id="statSkipped">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game controls -->
+        <div class="section" id="sectionControls" style="display: none">
+          <div class="section-title">Game controls</div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem">
+            <button
+              class="btn btn-amber btn-full"
+              id="startBtn"
+              onclick="startGame()"
+            >
+              Start game →
+            </button>
+            <button
+              class="btn btn-ghost btn-full"
+              id="nextBtn"
+              onclick="nextImage()"
+              disabled
+            >
+              Next image →
+            </button>
+            <button
+              class="btn btn-danger btn-full"
+              id="finishBtn"
+              onclick="finishSession()"
+              disabled
+            >
+              End &amp; export winners
+            </button>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="section" id="sectionLinks" style="display: none">
+          <div class="section-title">Open views</div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem">
+            <a
+              class="btn btn-ghost btn-full"
+              id="linkPresent"
+              href="#"
+              target="_blank"
+              >📺 Public presentation</a
+            >
+            <a class="btn btn-ghost btn-full" href="/join" target="_blank"
+              >📱 User voting page</a
+            >
+            <a class="btn btn-ghost btn-full" href="/host" target="_blank"
+              >🖥 Host control page</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Photo management -->
+      <div class="right-panel" id="rightPanel">
+        <div class="right-placeholder" id="rightPlaceholder">
+          <div class="icon">📷</div>
+          <p>Create a session to manage photos</p>
+          <p style="font-size: 0.8rem">
+            Once a session is active, photos will appear here.<br />Click any
+            photo to skip or include it.
+          </p>
+        </div>
+        <div
+          id="photoArea"
+          style="display: none; flex-direction: column; flex: 1"
+        >
+          <div
+            style="
+              padding: 1.25rem 1.5rem 0;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div class="section-title" style="margin-bottom: 0">
+              Photos
+              <span
+                id="photoCount"
+                style="color: var(--text); font-size: 0.9rem"
+              ></span>
+            </div>
+            <div style="display: flex; gap: 0.5rem">
+              <button
+                class="btn btn-ghost"
+                style="font-size: 0.8rem; padding: 0.4rem 0.75rem"
+                onclick="skipAll()"
+              >
+                Skip all
+              </button>
+              <button
+                class="btn btn-ghost"
+                style="font-size: 0.8rem; padding: 0.4rem 0.75rem"
+                onclick="includeAll()"
+              >
+                Include all
+              </button>
+            </div>
+          </div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+      </div>
+    </main>
+
+    <div id="toast"></div>
+
+    <script>
+      let sessionCode = null;
+      let pollTimer = null;
+      let skippedImages = new Set();
+      let allImages = [];
+
+      // ── API ─────────────────────────────────────────────────────────────────────
+      async function api(method, path, body) {
+        const opts = {
+          method,
+          headers: { "Content-Type": "application/json" },
+        };
+        if (body !== undefined) opts.body = JSON.stringify(body);
+        const res = await fetch(path, opts);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || res.statusText);
+        return data;
+      }
+
+      function toast(msg, type = "") {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = "show" + (type ? " " + type : "");
+        clearTimeout(el._t);
+        el._t = setTimeout(() => (el.className = ""), 2800);
+      }
+
+      // ── Timer toggles ──────────────────────────────────────────────────────────
+      function toggleLobbyTimer(on) {
+        document.getElementById("lobbyTimerS").disabled = !on;
+      }
+      function toggleGameTimer(on) {
+        document.getElementById("gameTimerS").disabled = !on;
+        document.getElementById("applyTimersBtn").disabled = !sessionCode;
+      }
+
+      // ── Mode toggle ────────────────────────────────────────────────────────────
+      document.getElementById("mode").addEventListener("change", (e) => {
+        const lbl = document
+          .getElementById("thresholdLabel")
+          .querySelector("small");
+        const inp = document.getElementById("threshold");
+        if (e.target.value === "star_rating") {
+          lbl.textContent = "(avg stars ≥ this)";
+          inp.min = 1;
+          inp.max = 5;
+          inp.step = 0.1;
+          inp.value = 3.5;
+        } else {
+          lbl.textContent = "(win-rate ≥ this, 0–1)";
+          inp.min = 0;
+          inp.max = 1;
+          inp.step = 0.05;
+          inp.value = 0.5;
+        }
+      });
+
+      // ── Create session ─────────────────────────────────────────────────────────
+      async function createSession() {
+        const lobbyOn = document.getElementById("lobbyTimerOn").checked;
+        const gameOn = document.getElementById("gameTimerOn").checked;
+        const body = {
+          mode: document.getElementById("mode").value,
+          threshold: parseFloat(document.getElementById("threshold").value),
+          max_per_user_mb: parseFloat(
+            document.getElementById("perUserMb").value,
+          ),
+          max_session_mb: parseFloat(
+            document.getElementById("sessionMb").value,
+          ),
+          host_image_dir:
+            document.getElementById("hostDir").value.trim() || null,
+          auto_advance_lobby_s: lobbyOn
+            ? parseFloat(document.getElementById("lobbyTimerS").value)
+            : null,
+          auto_advance_game_s: gameOn
+            ? parseFloat(document.getElementById("gameTimerS").value)
+            : null,
+        };
+        try {
+          const data = await api("POST", "/session/create", body);
+          sessionCode = data.code;
+          onSessionCreated();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      function onSessionCreated() {
+        document.getElementById("headerCode").textContent = sessionCode;
+        document.getElementById("sessionBadge").style.display = "flex";
+        document.getElementById("sectionCreate").style.display = "none";
+        document.getElementById("sectionStatus").style.display = "";
+        document.getElementById("sectionControls").style.display = "";
+        document.getElementById("sectionLinks").style.display = "";
+        document.getElementById("linkPresent").href = `/present/${sessionCode}`;
+        document.getElementById("applyTimersBtn").disabled = false;
+        document.getElementById("rightPlaceholder").style.display = "none";
+        document.getElementById("photoArea").style.display = "flex";
+        startPolling();
+      }
+
+      // ── Apply timers ───────────────────────────────────────────────────────────
+      async function applyTimers() {
+        if (!sessionCode) return;
+        const lobbyOn = document.getElementById("lobbyTimerOn").checked;
+        const gameOn = document.getElementById("gameTimerOn").checked;
+        try {
+          await api("PATCH", `/session/${sessionCode}/config`, {
+            auto_advance_lobby_s: lobbyOn
+              ? parseFloat(document.getElementById("lobbyTimerS").value)
+              : null,
+            auto_advance_game_s: gameOn
+              ? parseFloat(document.getElementById("gameTimerS").value)
+              : null,
+            skipped_images: [...skippedImages],
+          });
+          toast("Timers updated", "success");
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      // ── Game controls ──────────────────────────────────────────────────────────
+      async function startGame() {
+        try {
+          await api("POST", `/session/${sessionCode}/start`);
+          document.getElementById("startBtn").disabled = true;
+          document.getElementById("nextBtn").disabled = false;
+          document.getElementById("finishBtn").disabled = false;
+          toast("Game started", "success");
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      async function nextImage() {
+        try {
+          await api("POST", `/session/${sessionCode}/next`);
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      async function finishSession() {
+        if (!confirm("End game and export winners?")) return;
+        try {
+          const data = await api("POST", `/session/${sessionCode}/finish`);
+          toast(`Done — ${data.winners.length} winner(s) exported`, "success");
+          document.getElementById("nextBtn").disabled = true;
+          document.getElementById("finishBtn").disabled = true;
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      // ── Photo skip management ──────────────────────────────────────────────────
+      function toggleSkip(filename) {
+        if (skippedImages.has(filename)) {
+          skippedImages.delete(filename);
+        } else {
+          skippedImages.add(filename);
+        }
+        renderPhotoGrid();
+        pushSkips();
+      }
+
+      function skipAll() {
+        allImages.forEach((f) => skippedImages.add(f));
+        renderPhotoGrid();
+        pushSkips();
+      }
+      function includeAll() {
+        skippedImages.clear();
+        renderPhotoGrid();
+        pushSkips();
+      }
+
+      async function pushSkips() {
+        if (!sessionCode) return;
+        try {
+          await api("PATCH", `/session/${sessionCode}/config`, {
+            auto_advance_lobby_s: null,
+            auto_advance_game_s: null,
+            skipped_images: [...skippedImages],
+          });
+        } catch (e) {
+          /* silent — will be retried on next manual save */
+        }
+      }
+
+      function renderPhotoGrid() {
+        const grid = document.getElementById("photoGrid");
+        const count = document.getElementById("photoCount");
+        count.textContent = `(${allImages.length - skippedImages.size} active / ${allImages.length} total)`;
+        if (allImages.length === 0) {
+          grid.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:0.9rem;padding:2rem;text-align:center">No images in session yet — participants upload in the lobby.</div>`;
+          return;
+        }
+        grid.innerHTML = allImages
+          .map(
+            (f) => `
+          <div class="photo-card${skippedImages.has(f) ? " skipped" : ""}" onclick="toggleSkip('${f.replace(/'/g, "\\'")}')">
+            <img src="/images/${sessionCode}/${encodeURIComponent(f)}" alt="${f}" loading="lazy">
+            <span class="skip-badge">SKIP</span>
+            <span class="photo-name">${f}</span>
+          </div>`,
+          )
+          .join("");
+      }
+
+      // ── Polling ────────────────────────────────────────────────────────────────
+      function startPolling() {
+        clearInterval(pollTimer);
+        pollTimer = setInterval(poll, 2000);
+        poll();
+      }
+
+      async function poll() {
+        if (!sessionCode) return;
+        try {
+          const [stateData, imgData] = await Promise.all([
+            api("GET", `/session/${sessionCode}/state`),
+            api("GET", `/session/${sessionCode}/images`),
+          ]);
+
+          // Update state pill
+          const pill = document.getElementById("statePill");
+          pill.textContent = stateData.state;
+          pill.className = `state-pill state-${stateData.state}`;
+
+          // Stats
+          document.getElementById("statPlayers").textContent =
+            stateData.players.length;
+          document.getElementById("statImages").textContent =
+            imgData.images.length - stateData.skipped_images.length;
+          document.getElementById("statSkipped").textContent =
+            stateData.skipped_images.length;
+          if (stateData.plugin_state) {
+            document.getElementById("statShown").textContent =
+              `${stateData.plugin_state.image_index + 1} / ${stateData.plugin_state.total_images}`;
+          }
+
+          // Refresh photo grid if images changed
+          const incoming = imgData.images;
+          if (JSON.stringify(incoming) !== JSON.stringify(allImages)) {
+            allImages = incoming;
+            // Merge server-side skips (don't overwrite local)
+            imgData.skipped.forEach((f) => skippedImages.add(f));
+            renderPhotoGrid();
+          }
+
+          if (stateData.state === "end") clearInterval(pollTimer);
+        } catch (e) {
+          /* silent */
+        }
+      }
+    </script>
+  </body>
+</html>
